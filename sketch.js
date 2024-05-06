@@ -390,7 +390,7 @@ function removeMine() {
 }
 function playerShoot() {
   shot = new shots.Sprite(turret.x, turret.y, canvasW / 180);
-  shot.rotation = turret.rotation;
+  shot.direction = turret.rotation;
   shots.color = "darkblue";
   shots.overlap(body);
   shots.overlap(turret);
