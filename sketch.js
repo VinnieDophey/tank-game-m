@@ -18,6 +18,8 @@ let reload = 0;
 var gameStatus = "startScreen";
 let reloadTimer = 2000;
 let maxForwardSpeed = 0.1;
+let fade = 0;
+let enemyRel = false;
 function setup() {
   bg = loadImage("Tank Title Screen.png");
   new Canvas(canvasW, canvasH, "fullscreen");
@@ -53,7 +55,7 @@ function setup() {
   l = new GlueJoint(wheelLeft, body);
   r = new GlueJoint(wheelRight, body);
   directionFront = new Sprite(body.x, body.y - canvasW / 100, 10);
-  directionFront.opacity = 0;
+
   directionBack = new Sprite(body.x, body.y + canvasW / 100, 10);
   directionBack.opacity = 0;
   // directionLeft = new Sprite(body.x-30, body.y, 10);
@@ -72,6 +74,7 @@ function setup() {
   // turret.overlap(directionRight);
 
   shots = new Group();
+
   shot = new Sprite(-50, -50, canvasW / 110);
   shot.remove();
   let mine;
@@ -90,43 +93,43 @@ function setup() {
 
   g = new Group();
   g.tile = "1";
-  gbody = new g.Sprite(1000, canvasH / 2, canvasW / 40, canvasH / 16, "k");
-  gturret = new g.Sprite(gbody.x, gbody.y, canvasW / 25, canvasH / 110, "k");
-  gbody.layer = 2;
-  gj = new HingeJoint(gturret, gbody);
-  gturret.overlap(gbody);
-  gbody.color = "	#345715";
-  gturret.color = "	#345715";
-  gturret.offset.x = canvasH / 55;
-  gwheelLeft = new g.Sprite(
-    gbody.x - canvasW / 80,
-    gbody.y,
-    canvasW / 120,
-    canvasH / 16
-  );
-  gwheelLeft.color = "black";
-  gwheelRight = new g.Sprite(
-    gbody.x + canvasW / 80,
-    gbody.y,
-    canvasW / 120,
-    canvasH / 16
-  );
-  gwheelRight.color = "black";
-  gwheelLeft.layer = 1;
-  gwheelRight.layer = 1;
-  gwheelLeft.overlap(gwheelRight);
-  gbody.overlap(gwheelLeft);
-  gturret.overlap(gwheelLeft);
-  gbody.overlap(gwheelRight);
-  gturret.overlap(gwheelRight);
-  gl = new GlueJoint(gwheelLeft, gbody);
-  gr = new GlueJoint(gwheelRight, gbody);
-  gState = "wander";
+  // gbody = new g.Sprite(1000, canvasH / 2, canvasW / 40, canvasH / 16, "k");
+  // gturret = new g.Sprite(gbody.x, gbody.y, canvasW / 25, canvasH / 110, "k");
+  // gbody.layer = 2;
+  // gj = new HingeJoint(gturret, gbody);
+  // gturret.overlap(gbody);
+  // gbody.color = "	#345715";
+  // gturret.color = "	#345715";
+  // gturret.offset.x = canvasH / 55;
+  // gwheelLeft = new g.Sprite(
+  //   gbody.x - canvasW / 80,
+  //   gbody.y,
+  //   canvasW / 120,
+  //   canvasH / 16
+  // );
+  // gwheelLeft.color = "black";
+  // gwheelRight = new g.Sprite(
+  //   gbody.x + canvasW / 80,
+  //   gbody.y,
+  //   canvasW / 120,
+  //   canvasH / 16
+  // );
+  // gwheelRight.color = "black";
+  // gwheelLeft.layer = 1;
+  // gwheelRight.layer = 1;
+  // gwheelLeft.overlap(gwheelRight);
+  // gbody.overlap(gwheelLeft);
+  // gturret.overlap(gwheelLeft);
+  // gbody.overlap(gwheelRight);
+  // gturret.overlap(gwheelRight);
+  // gl = new GlueJoint(gwheelLeft, gbody);
+  // gr = new GlueJoint(gwheelRight, gbody);
+  // gState = "wander";
 
   newMap();
   cur = new Sprite();
   cur.overlap(allSprites);
-
+  enemyReload();
   cur.img = "blueCursor.webp";
   cur.scale = 0.07;
   mouse.visible = false;
@@ -135,11 +138,34 @@ function setup() {
   metal.layer = 1;
   sand.layer = 1;
   cur.layer = 5;
-  text = new Sprite(0.8 * canvasW, 0.6 * canvasH, canvasW / 4, 100);
+  text = new Sprite(0.8 * canvasW, 0.6 * canvasH, canvasW / 4, 100, "s");
   text.color = "brown";
   text.text = "Press [SPACE] to Start";
   text.textSize = 30;
   text.textColor = "white";
+  screenCover = new Sprite(0, 0, canvasW * 2, canvasH * 2, "s");
+  screenCover.color = "black";
+  screenCover.overlap(allSprites);
+
+  ET = new Group();
+  ET.layer = 1;
+  ET.color = "brown";
+  enemyBody = new ET.Sprite(1000, canvasH / 2, canvasH / 16, "k");
+  enemyTurret = new ET.Sprite(
+    enemyBody.x,
+    enemyBody.y,
+    canvasW / 25,
+    canvasH / 110,
+    "k"
+  );
+  enemyTurret.offset.x = canvasH / 55;
+  enemyShots = new Group();
+  enemyShot = new enemyShots.Sprite(
+    enemyTurret.x,
+    enemyTurret.y,
+    canvasW / 180
+  );
+  enemyShot.remove();
   enemyAI();
 }
 
@@ -164,65 +190,64 @@ function newMap() {
   sand.collider = "k";
   sand.tile = "s";
   sand.color = "	#c46f69";
-  if (gameStatus == "1") {
-    tilesGroup = new Tiles(
-      [
-        "rrrrrrrrrrmmmmrrrrrrrrrr",
-        "r......................m",
-        "r.........r............m",
-        "r........r.........rr..r",
-        "r........r.............r",
-        "r........s.............r",
-        "r........s.............m",
-        "r........r.............r",
-        "r........r.............r",
-        "r........r.........rr..r",
-        "r.........r............r",
-        "r......................m",
-        "r......................m",
-        "rrrrrrrrrrmmmmrrrrrrrrrr",
-      ],
-      30,
-      30,
-      rock.w + 0,
-      rock.h + 0
-    );
-    var matrix = [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ];
-    var grid = new PF.Grid(matrix);
+  tilesGroup = new Tiles(
+    [
+      "rrrrrrrrrrmmmmrrrrrrrrrr",
+      "r......................m",
+      "r.........r............m",
+      "r........r.........rr..r",
+      "r........r.............r",
+      "r........s.............r",
+      "r........s.............m",
+      "r........r.............r",
+      "r........r.............r",
+      "r........r.........rr..r",
+      "r.........r............r",
+      "r......................m",
+      "r......................m",
+      "rrrrrrrrrrmmmmrrrrrrrrrr",
+    ],
+    30,
+    30,
+    rock.w + 0,
+    rock.h + 0
+  );
+  // var matrix = [
+  //   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  //   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  // ];
+  // var grid = new PF.Grid(matrix);
 
-    var finder = new PF.AStarFinder({
-      allowDiagonal: true,
-      dontCrossCorners: true,
-    });
-    var path = finder.findPath(16, 6, 3, 9, grid);
-    // console.log(path);
+  // var finder = new PF.AStarFinder({
+  //   allowDiagonal: true,
+  //   dontCrossCorners: true,
+  // });
+  // var path = finder.findPath(16, 6, 3, 9, grid);
+  // // console.log(path);
 
-    node = new Group();
-    node.visited = false;
-    node.radius = 10;
-    node.collider = "n";
-    // console.log(path);
-    for (p of path) {
-      n = new node.Sprite(p[0] * 60 + 20, p[1] * 60 + 20);
-    }
-  }
+  // node = new Group();
+  // node.visited = false;
+  // node.radius = 10;
+  // node.collider = "n";
+  // // console.log(path);
+  // for (p of path) {
+  //   n = new node.Sprite(p[0] * 60 + 20, p[1] * 60 + 20);
+  // }
 }
+
 function draw() {
   if (peformance == false) {
     if (kb.pressed("p")) {
@@ -235,19 +260,19 @@ function draw() {
       peformance = false;
     }
   }
-  moveEnemy();
+  // moveEnemy();
 
-  async function moveEnemy() {
-    for (i = 0; i < node.length; i++) {
-      await gbody.moveTo(node[i]);
-      // if (gbody.x == node[i].x) {
-      //   if (gbody.y == node[i].y) {
+  // async function moveEnemy() {
+  // for (i = 0; i < node.length; i++) {
+  // await gbody.moveTo(node[i]);
+  // if (gbody.x == node[i].x) {
+  //   if (gbody.y == node[i].y) {
 
-      //   }
-      // }
-    }
-  }
-  moveEnemy().then();
+  //   }
+  // }
+  // }
+  // }
+  // moveEnemy().then();
 
   cur.moveTowards(mouse, 1);
   if (gameStatus == "startScreen") {
@@ -265,28 +290,84 @@ function draw() {
 function start() {
   background(bg);
   allSprites.opacity = 0;
+  screenCover.opacity = fade;
   text.opacity = 1;
   if (kb.pressed(" ")) {
-    console.log("no");
+    // fadeIn();
+    setTimeout(starting, 1000);
+    // alert("hi");
   }
 }
-function levelOne(mine) {
+// function fadeIn() {
+//   fade = fadeIn + 0.01;
+//   if (fade == 1) {
+//     return;
+//   } else {
+//     setTimeout(fadeIn, 10);
+//   }
+// }
+// function fadeOut() {
+//   fade = fadeOut - 0.01;
+//   if (fade == 0) {
+//     return;
+//   } else {
+//     setTimeout(fadeOut, 10);
+//   }
+// }
+function starting() {
+  allSprites.opacity = 1;
+  directionFront.opacity = 0;
+  directionBack.opacity = 0;
+  gameStatus = "1";
+}
+function levelOne() {
+  text.remove();
   playerControls();
-  gturret.x = gbody.x;
-  gturret.y = gbody.y;
+  // fadeOut();
+  screenCover.opacity = fade;
+  // gturret.x = gbody.x;
+  // gturret.y = gbody.y;
   if ((gState = "wander")) {
     // gbody.moveTo(gbody.x+15)
   }
   if (tracker.overlap(rock)) {
-    gturret.rotationSpeed = 0;
+    enemyTurret.rotationSpeed = 1;
     tracker.remove();
   } else if (tracker.overlap(body)) {
-    gturret.rotateMinTo(body, 1, 0);
+    enemyTurret.rotateMinTo(body, 1, 0);
+
+    if (enemyRel == true) {
+      enemyShoot();
+    }
     tracker.remove();
   }
+  enemyShot.collides(rock, enemyShotBlowup);
   bullet();
 }
+function enemyShoot() {
+  enemyShot = new enemyShots.Sprite(
+    enemyTurret.x,
+    enemyTurret.y,
+    canvasW / 180
+  );
 
+  enemyShot.direction = enemyTurret.rotation;
+  enemyShot.speed = 20;
+  enemyShots.color = "black";
+  enemyShots.overlap(enemyBody);
+  enemyShots.overlap(enemyTurret);
+  enemyShots.bounciness = 0.999;
+}
+function enemyShotBlowup(enemyShot, rock) {
+  enemyShot.diameter = canvasW / 80;
+  enemyShot.speed = 0;
+  enemyShot.color = "yellow";
+  setTimeout(() => {
+    removeShell(enemyShot), 1;
+  });
+}
+
+function enemyShotRemove() {}
 function playerControls() {
   turret.rotateMinTo(mouse, 1, 0);
   // camera.x = body.x;
@@ -381,15 +462,20 @@ function playerMovement() {
   if (kb.released("right")) {
     rotationSpeed = 0;
   }
+  //AI for level 1
+  // if (gState == "wander") {
+  //   gbody.direction = -90;
+  //   gturret.rotate = (15,30);
+  //   gbody.speed = 1;
+  // }
 }
 
 function enemyAI() {
-  tracker = new Sprite(gbody.x, gbody.y, 5);
+  tracker = new Sprite(enemyBody.x, enemyBody.y, 5);
   tracker.opacity = 0;
   tracker.overlap(allSprites);
   tracker.direction = tracker.angleTo(body);
   tracker.speed = 50;
-  // tracker.moveTo(body, 50);
   tracker.life = 20;
   setTimeout(enemyAI, 500);
 }
@@ -479,4 +565,12 @@ function gameOver() {
 }
 function win() {
   background("green");
+}
+function enemyReload() {
+  if (enemyRel == false) {
+    enemyRel = true;
+  } else {
+    enemyRel = false;
+  }
+  setTimeout(enemyReload, reloadTimer);
 }
