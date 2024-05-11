@@ -20,6 +20,7 @@ let reloadTimer = 2000;
 let maxForwardSpeed = 0.1;
 let fade = 0;
 let enemyRel = false;
+level = 1;
 function setup() {
   bg = loadImage("Tank Title Screen.png");
   new Canvas(canvasW, canvasH, "fullscreen");
@@ -285,7 +286,7 @@ function draw() {
   cur.moveTowards(mouse, 1);
   if (gameStatus == "startScreen") {
     start();
-  } else if (gameStatus == "1") {
+  } else if (gameStatus == 1) {
     levelOne();
     background("green");
     console.log(gameStatus);
@@ -323,7 +324,7 @@ function starting() {
   allSprites.opacity = 1;
   directionFront.opacity = 0;
   directionBack.opacity = 0;
-  gameStatus = "1";
+  gameStatus = level;
 }
 function levelOne() {
   text.remove();
@@ -348,6 +349,21 @@ function levelOne() {
   }
   enemyShot.collides(rock, enemyShotBlowup);
   enemyShot.collides(body, hit);
+  enemyShot.collides(wheelLeft, whit);
+  enemyShot.collides(wheelRight, whit);
+  if (shot.collides(enemyBody)) {
+    let bulletChance = random(0, 100);
+    if (bulletChance > 50) {
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "No Penetration";
+    } else {
+      gameStatus = "win";
+    }
+  }
+  if (mines.overlap(enemyBody)) {
+    gameStatus = "win";
+  }
   bullet();
 }
 function hit(body, enemyShot) {
@@ -360,11 +376,25 @@ function hit(body, enemyShot) {
   } else if (bulletChance < 30) {
     damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
     damageIndicator.opacity = 1;
-    damageIndicator.text = "Reparing";
+    damageIndicator.text = "Reparing. EST: 3s";
     maxForwardSpeed = 0;
-    setTimeout(repair, 1000);
+    setTimeout(repair, 3000);
   } else {
     gameStatus = "lose";
+  }
+}
+function whit(wheelLeft, enemyShot) {
+  let bulletChance = random(0, 100);
+  if (bulletChance > 80) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Hit! No major damage.";
+  } else if (bulletChance < 80) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Tracks damaged. Reparing Tracks";
+    maxForwardSpeed = 0;
+    setTimeout(repair, 5000);
   }
 }
 function repair() {
@@ -605,7 +635,9 @@ function sorryForTrauma() {
   location.reload();
 }
 function win() {
-  background("green");
+  enemyBody.color = "black";
+  enemyTurret.color = "black";
+  level++;
 }
 function enemyReload() {
   if (enemyRel == false) {
