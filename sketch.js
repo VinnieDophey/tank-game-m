@@ -175,6 +175,10 @@ function setup() {
   damageIndicator.life = 60;
   damageIndicator.collider = "s";
   damageIndicator.overlap(allSprites);
+  controls = new Sprite();
+  controls.diameter = 40;
+  controls.collider = "s";
+  controls.image = "controls.png";
   enemyAI();
 }
 
@@ -221,6 +225,7 @@ function newMap() {
     rock.w + 0,
     rock.h + 0
   );
+
   // var matrix = [
   //   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -290,6 +295,8 @@ function draw() {
     levelOne();
     background("green");
     console.log(gameStatus);
+  } else if (gameStatus == 2) {
+    levelTwo();
   } else if (gameStatus == "lose") {
     gameOver();
   } else if (gameStatus == "win") {
@@ -328,6 +335,10 @@ function starting() {
 }
 function levelOne() {
   text.remove();
+  controls.x = 300;
+  controls.y = 400;
+  controls.scale = 0.8;
+  controls.overlap(allSprites);
   playerControls();
   // fadeOut();
   screenCover.opacity = fade;
@@ -351,6 +362,50 @@ function levelOne() {
   enemyShot.collides(body, hit);
   enemyShot.collides(wheelLeft, whit);
   enemyShot.collides(wheelRight, whit);
+  enemyShot.collides(turret, thit);
+  if (shot.collides(enemyBody)) {
+    let bulletChance = random(0, 100);
+    if (bulletChance > 50) {
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "No Penetration";
+    } else {
+      gameStatus = "win";
+    }
+  }
+  if (mines.overlap(enemyBody)) {
+    gameStatus = "win";
+  }
+  bullet();
+}
+
+function levelTwo() {
+  controls.remove();
+  playerControls();
+
+  // fadeOut();
+  screenCover.opacity = fade;
+  // gturret.x = gbody.x;
+  // gturret.y = gbody.y;
+  if ((gState = "wander")) {
+    // gbody.moveTo(gbody.x+15)
+  }
+  if (tracker.overlap(rock)) {
+    enemyTurret.rotationSpeed = 1;
+    tracker.remove();
+  } else if (tracker.overlap(body)) {
+    enemyTurret.rotateMinTo(body, 1, 0);
+
+    if (enemyRel == true) {
+      enemyShoot();
+    }
+    tracker.remove();
+  }
+  enemyShot.collides(rock, enemyShotBlowup);
+  enemyShot.collided(body, hit);
+  enemyShot.collided(wheelLeft, whit);
+  enemyShot.collided(wheelRight, whit);
+  enemyShot.collided(turret, thit);
   if (shot.collides(enemyBody)) {
     let bulletChance = random(0, 100);
     if (bulletChance > 50) {
@@ -384,6 +439,7 @@ function hit(body, enemyShot) {
   }
 }
 function whit(wheelLeft, enemyShot) {
+  enemyShotBlowup(wheelLeft);
   let bulletChance = random(0, 100);
   if (bulletChance > 80) {
     damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
@@ -395,6 +451,20 @@ function whit(wheelLeft, enemyShot) {
     damageIndicator.text = "Tracks damaged. Reparing Tracks";
     maxForwardSpeed = 0;
     setTimeout(repair, 5000);
+  }
+}
+function thit() {
+  let bulletChance = random(0, 100);
+  if (bulletChance > 90) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Hit! No major damage.";
+  } else if (bulletChance < 90) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Turret Damaged. Reparing.";
+    reload = 1;
+    setTimeout(reloading, 3000);
   }
 }
 function repair() {
@@ -613,6 +683,7 @@ function removeShell(shot) {
   shot.remove();
 }
 function gameOver() {
+  controls.remove();
   body.color = "red";
   turret.color = "red";
   body.speed = 0;
@@ -638,6 +709,7 @@ function win() {
   enemyBody.color = "black";
   enemyTurret.color = "black";
   level++;
+  gameStatus = level;
 }
 function enemyReload() {
   if (enemyRel == false) {
