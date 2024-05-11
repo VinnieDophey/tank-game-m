@@ -287,14 +287,13 @@ function draw() {
   // }
   // }
   // moveEnemy().then();
-
+  console.log(gameStatus);
   cur.moveTowards(mouse, 1);
   if (gameStatus == "startScreen") {
     start();
   } else if (gameStatus == 1) {
     levelOne();
     background("green");
-    console.log(gameStatus);
   } else if (gameStatus == 2) {
     levelTwo();
   } else if (gameStatus == "lose") {
@@ -380,16 +379,10 @@ function levelOne() {
 }
 
 function levelTwo() {
+  background("green");
   controls.remove();
   playerControls();
 
-  // fadeOut();
-  screenCover.opacity = fade;
-  // gturret.x = gbody.x;
-  // gturret.y = gbody.y;
-  if ((gState = "wander")) {
-    // gbody.moveTo(gbody.x+15)
-  }
   if (tracker.overlap(rock)) {
     enemyTurret.rotationSpeed = 1;
     tracker.remove();
@@ -402,10 +395,10 @@ function levelTwo() {
     tracker.remove();
   }
   enemyShot.collides(rock, enemyShotBlowup);
-  enemyShot.collided(body, hit);
-  enemyShot.collided(wheelLeft, whit);
-  enemyShot.collided(wheelRight, whit);
-  enemyShot.collided(turret, thit);
+  enemyShot.collides(body, hit);
+  enemyShot.collides(wheelLeft, whit);
+  enemyShot.collides(wheelRight, whit);
+  enemyShot.collides(turret, thit);
   if (shot.collides(enemyBody)) {
     let bulletChance = random(0, 100);
     if (bulletChance > 50) {
@@ -708,8 +701,18 @@ function sorryForTrauma() {
 function win() {
   enemyBody.color = "black";
   enemyTurret.color = "black";
-  level++;
+
   gameStatus = level;
+  if ((gameStatus = 2)) {
+    body.rotation = 0;
+    body.x = 200;
+    body.y = 200;
+  }
+  setTimeout(next, 1000);
+  console.log(gameStatus);
+}
+function next() {
+  level++;
 }
 function enemyReload() {
   if (enemyRel == false) {
