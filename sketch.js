@@ -146,6 +146,7 @@ function setup() {
   screenCover = new Sprite(0, 0, canvasW * 2, canvasH * 2, "s");
   screenCover.color = "black";
   screenCover.overlap(allSprites);
+  screenCover.layer = 4;
 
   ET = new Group();
   ET.layer = 1;
@@ -160,12 +161,19 @@ function setup() {
   );
   enemyTurret.offset.x = canvasH / 55;
   enemyShots = new Group();
+  enemyShots.life = 3000;
   enemyShot = new enemyShots.Sprite(
     enemyTurret.x,
     enemyTurret.y,
     canvasW / 180
   );
   enemyShot.remove();
+  damageIndicator = new Group();
+  damageIndicator.opacity = 0.5;
+  damageIndicator.color = "black";
+  damageIndicator.life = 60;
+  damageIndicator.collider = "s";
+  damageIndicator.overlap(allSprites);
   enemyAI();
 }
 
@@ -298,14 +306,11 @@ function start() {
     // alert("hi");
   }
 }
-// function fadeIn() {
-//   fade = fadeIn + 0.01;
-//   if (fade == 1) {
-//     return;
-//   } else {
-//     setTimeout(fadeIn, 10);
-//   }
-// }
+function fadeIn() {
+  fade = fade + 0.01;
+  screenCover.opacity = fade;
+  setTimeout(fadeIn, 1000);
+}
 // function fadeOut() {
 //   fade = fadeOut - 0.01;
 //   if (fade == 0) {
@@ -342,7 +347,28 @@ function levelOne() {
     tracker.remove();
   }
   enemyShot.collides(rock, enemyShotBlowup);
+  enemyShot.collides(body, hit);
   bullet();
+}
+function hit(body, enemyShot) {
+  enemyShotBlowup(body);
+  let bulletChance = random(0, 100);
+  if (bulletChance > 50) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Hit! No major damage.";
+  } else if (bulletChance < 30) {
+    damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
+    damageIndicator.opacity = 1;
+    damageIndicator.text = "Reparing";
+    maxForwardSpeed = 0;
+    setTimeout(repair, 1000);
+  } else {
+    gameStatus = "lose";
+  }
+}
+function repair() {
+  maxForwardSpeed = 0.1;
 }
 function enemyShoot() {
   enemyShot = new enemyShots.Sprite(
@@ -562,6 +588,21 @@ function gameOver() {
   body.speed = 0;
   body.rotationSpeed = 0;
   background("black");
+  setTimeout(fadeIn, 1000);
+  setTimeout(gameOverText, 2000);
+  setTimeout(sorryForTrauma, 5000);
+}
+function gameOverText() {
+  GG = new Sprite(canvasW / 2, canvasH / 3, 0, 0);
+  GG.opacity = 0.2;
+  GG.text = "You only live once.";
+  GG.textSize = 40;
+  GG.textColor = "red";
+  GGFade();
+}
+
+function sorryForTrauma() {
+  location.reload();
 }
 function win() {
   background("green");
