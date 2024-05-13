@@ -261,7 +261,30 @@ function newMap() {
   //   n = new node.Sprite(p[0] * 60 + 20, p[1] * 60 + 20);
   // }
 }
-
+function L2Map() {
+  tilesGroup = new Tiles(
+    [
+      "rrrrrrrrrrrrrrrrrrrrrrrr",
+      "r......................r",
+      "r......................r",
+      "r..........rrr.........r",
+      "r......................r",
+      "r........r.............r",
+      "r........r.............r",
+      "r........r.....rrr.....r",
+      "r......................r",
+      "r....rrr...............r",
+      "r......................r",
+      "r.....rrr.....rrr......r",
+      "r......................r",
+      "rrrrrrrrrrrrrrrrrrrrrrrr",
+    ],
+    30,
+    30,
+    rock.w + 0,
+    rock.h + 0
+  );
+}
 function draw() {
   if (peformance == false) {
     if (kb.pressed("p")) {
@@ -293,7 +316,7 @@ function draw() {
     start();
   } else if (gameStatus == 1) {
     levelOne();
-    background("green");
+    background("#C2B280");
   } else if (gameStatus == 2) {
     levelTwo();
   } else if (gameStatus == "lose") {
@@ -334,6 +357,7 @@ function starting() {
 }
 function levelOne() {
   text.remove();
+
   controls.x = 300;
   controls.y = 400;
   controls.scale = 0.8;
@@ -379,16 +403,24 @@ function levelOne() {
 }
 
 function levelTwo() {
+  if ((enemyBody.y = 700)) {
+    enemyBody.moveTo(1250, 200);
+    enemyTurret.moveTo(1250, 200);
+  }
+
+  if ((enemyBody.y = 200)) {
+    enemyBody.moveTo(1250, 700);
+    enemyTurret.moveTo(1250, 700);
+  }
+
   background("green");
   controls.remove();
   playerControls();
-
   if (tracker.overlap(rock)) {
     enemyTurret.rotationSpeed = 1;
     tracker.remove();
   } else if (tracker.overlap(body)) {
     enemyTurret.rotateMinTo(body, 1, 0);
-
     if (enemyRel == true) {
       enemyShoot();
     }
@@ -705,8 +737,24 @@ function win() {
   gameStatus = level;
   if ((gameStatus = 2)) {
     body.rotation = 0;
+    allSprites.rotationSpeed = 0;
+    allSprites.speed = 0;
     body.x = 200;
     body.y = 200;
+    wheelLeft.x = body.x;
+    wheelLeft.y = body.y;
+    wheelRight.x = body.x;
+    wheelRight.y = body.y;
+    turret.x = body.x;
+    turret.y = body.y;
+    enemyBody.x = 1250;
+    enemyBody.y = 700;
+    enemyTurret.x = enemyBody.x;
+    enemyTurret.y = enemyBody.y;
+    enemyBody.color = "orange";
+    enemyTurret.color = "red";
+    tilesGroup.remove();
+    L2Map();
   }
   setTimeout(next, 1000);
   console.log(gameStatus);
