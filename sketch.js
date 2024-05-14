@@ -728,7 +728,8 @@ function win() {
   enemyTurret.color = "black";
 
   gameStatus = level;
-  if ((gameStatus = 2)) {
+  console.log(gameStatus + "Hi");
+  if ((gameStatus = 1)) {
     body.rotation = 0;
     allSprites.rotationSpeed = 0;
     allSprites.speed = 0;
@@ -753,12 +754,12 @@ function win() {
 
     L2Map();
   }
-  setTimeout(next, 1000);
+  level++;
+  gameStatus = level;
+  console.log(level + "akdbjaodhiawodihaw");
   console.log(gameStatus);
 }
-function next() {
-  level++;
-}
+
 function enemyReload() {
   enemyRel = !enemyRel;
   setTimeout(enemyReload, reloadTimer);
