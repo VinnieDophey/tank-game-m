@@ -147,7 +147,7 @@ function setup() {
   screenCover = new Sprite(0, 0, canvasW * 2, canvasH * 2, "s");
   screenCover.color = "black";
   screenCover.overlap(allSprites);
-  screenCover.layer = 4;
+  // screenCover.layer = 4;
 
   ET = new Group();
   ET.layer = 1;
@@ -403,15 +403,8 @@ function levelOne() {
 }
 
 function levelTwo() {
-  if ((enemyBody.y = 700)) {
-    enemyBody.moveTo(1250, 200);
-    enemyTurret.moveTo(1250, 200);
-  }
-
-  if ((enemyBody.y = 200)) {
-    enemyBody.moveTo(1250, 700);
-    enemyTurret.moveTo(1250, 700);
-  }
+  enemyBody.moveTo(1250, 200);
+  enemyTurret.moveTo(1250, 200);
 
   background("green");
   controls.remove();
@@ -754,6 +747,10 @@ function win() {
     enemyBody.color = "orange";
     enemyTurret.color = "red";
     tilesGroup.remove();
+    if (playermines != 0) {
+      blowMine();
+    }
+
     L2Map();
   }
   setTimeout(next, 1000);
@@ -763,10 +760,6 @@ function next() {
   level++;
 }
 function enemyReload() {
-  if (enemyRel == false) {
-    enemyRel = true;
-  } else {
-    enemyRel = false;
-  }
+  enemyRel = !enemyRel;
   setTimeout(enemyReload, reloadTimer);
 }
