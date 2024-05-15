@@ -20,7 +20,10 @@ let reloadTimer = 2000;
 let maxForwardSpeed = 0.1;
 let fade = 0;
 let enemyRel = false;
+overlappingMine = false;
+runGameOver = false;
 level = 1;
+let enemyCantShoot = false;
 function setup() {
   bg = loadImage("Tank Title Screen.png");
   new Canvas(canvasW, canvasH, "fullscreen");
@@ -176,9 +179,11 @@ function setup() {
   damageIndicator.collider = "s";
   damageIndicator.overlap(allSprites);
   controls = new Sprite();
-  controls.diameter = 40;
+  controls.diameter = 20;
   controls.collider = "s";
   controls.image = "controls.png";
+  GG = new Sprite(canvasW / 2, canvasH / 3, 0, 0);
+  GG.opacity = 0;
   enemyAI();
 }
 
@@ -286,6 +291,7 @@ function L2Map() {
   );
 }
 function draw() {
+  console.log(overlappingMine);
   if (peformance == false) {
     if (kb.pressed("p")) {
       p5play.renderStats = true;
@@ -320,9 +326,13 @@ function draw() {
   } else if (gameStatus == 2) {
     levelTwo();
   } else if (gameStatus == "lose") {
-    gameOver();
+    if ((runGameOver = true)) {
+      gameOver();
+    }
   } else if (gameStatus == "win") {
     win();
+  } else if (gameStatus == "instructions") {
+    starting();
   }
 }
 function start() {
@@ -332,7 +342,7 @@ function start() {
   text.opacity = 1;
   if (kb.pressed(" ")) {
     // fadeIn();
-    setTimeout(starting, 1000);
+    gameStatus = "instructions";
     // alert("hi");
   }
 }
@@ -353,15 +363,17 @@ function starting() {
   allSprites.opacity = 1;
   directionFront.opacity = 0;
   directionBack.opacity = 0;
-  gameStatus = level;
+  controls.x = canvasW / 2;
+  controls.y = canvasH / 2;
+  controls.scale = 0.3;
+  controls.overlap(allSprites);
+  if (kb.pressed(" ")) {
+    gameStatus = level;
+  }
 }
 function levelOne() {
   text.remove();
-
-  controls.x = 300;
-  controls.y = 400;
-  controls.scale = 0.8;
-  controls.overlap(allSprites);
+  controls.remove();
   playerControls();
   // fadeOut();
   screenCover.opacity = fade;
@@ -386,6 +398,8 @@ function levelOne() {
   enemyShot.collides(wheelLeft, whit);
   enemyShot.collides(wheelRight, whit);
   enemyShot.collides(turret, thit);
+  shot.collides(sand, shit);
+  enemyShot.collides(sand, shit);
   if (shot.collides(enemyBody)) {
     let bulletChance = random(0, 100);
     if (bulletChance > 50) {
@@ -396,18 +410,44 @@ function levelOne() {
       gameStatus = "win";
     }
   }
+  if (shot.collides(enemyTurret)) {
+    let bulletChance = random(0, 100);
+    if (bulletChance > 50) {
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "Turret Disabled";
+      setTimeout(enemyTurretRepair, 3000);
+      enemyCantShoot = true;
+    } else {
+      gameStatus = "win";
+    }
+  }
   if (mines.overlap(enemyBody)) {
     gameStatus = "win";
   }
   bullet();
-}
+  if (body.overlapping(mines)) {
+    // console.log(mines)
+    overlappingMine = true;
+  } else {
+    overlappingMine = false;
+  }
 
+  if (reload == 1) {
+    turret.color = "grey";
+  } else {
+    turret.color = "	#0D98BA";
+  }
+}
+function shit(sands, shots) {
+  shots.remove();
+  sands.remove();
+}
 function levelTwo() {
   enemyBody.moveTo(1250, 200);
   enemyTurret.moveTo(1250, 200);
 
   background("green");
-  controls.remove();
   playerControls();
   if (tracker.overlap(rock)) {
     enemyTurret.rotationSpeed = 1;
@@ -424,6 +464,7 @@ function levelTwo() {
   enemyShot.collides(wheelLeft, whit);
   enemyShot.collides(wheelRight, whit);
   enemyShot.collides(turret, thit);
+  enemyShot.collides(sand, shit);
   if (shot.collides(enemyBody)) {
     let bulletChance = random(0, 100);
     if (bulletChance > 50) {
@@ -434,10 +475,35 @@ function levelTwo() {
       gameStatus = "win";
     }
   }
+  if (shot.collides(enemyTurret)) {
+    let bulletChance = random(0, 100);
+    if (bulletChance > 50) {
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "Turret Disabled";
+      setTimeout(enemyTurretRepair, 3000);
+      enemyCantShoot = true;
+    } else {
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "No Damage";
+    }
+  }
   if (mines.overlap(enemyBody)) {
     gameStatus = "win";
   }
   bullet();
+  if (body.overlapping(mines)) {
+    // console.log(mines)
+    overlappingMine = true;
+  } else {
+    overlappingMine = false;
+  }
+  if (reload == 1) {
+    turret.color = "grey";
+  } else {
+    turret.color = "	#0D98BA";
+  }
 }
 function hit(body, enemyShot) {
   enemyShotBlowup(body);
@@ -454,6 +520,7 @@ function hit(body, enemyShot) {
     setTimeout(repair, 3000);
   } else {
     gameStatus = "lose";
+    runGameOver = true;
   }
 }
 function whit(wheelLeft, enemyShot) {
@@ -463,12 +530,15 @@ function whit(wheelLeft, enemyShot) {
     damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
     damageIndicator.opacity = 1;
     damageIndicator.text = "Hit! No major damage.";
-  } else if (bulletChance < 80) {
+  } else if (bulletChance < 60) {
     damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
     damageIndicator.opacity = 1;
     damageIndicator.text = "Tracks damaged. Reparing Tracks";
     maxForwardSpeed = 0;
     setTimeout(repair, 5000);
+  } else {
+    gameStatus = "lose";
+    runGameOver = true;
   }
 }
 function thit() {
@@ -621,11 +691,20 @@ function enemyAI() {
   tracker.direction = tracker.angleTo(body);
   tracker.speed = 50;
   tracker.life = 20;
+
   setTimeout(enemyAI, 500);
 }
 function blowMine() {
-  mine.diameter = canvasW / 10;
+  mine.diameter = canvasW / 8;
   mine.color = "yellow";
+  mine.overlap(wheelLeft);
+  mine.overlap(wheelRight);
+  mine.overlap(turret);
+  if (overlappingMine == true) {
+    gameStatus = "lose";
+    runGameOver = true;
+    console.log("wut");
+  }
   setTimeout(removeMine, 200);
 }
 function removeMine() {
@@ -673,6 +752,7 @@ function playerMine() {
 }
 function reloading() {
   reload = 1;
+
   setTimeout(doneReloading, reloadTimer);
 }
 function doneReloading() {
@@ -701,6 +781,7 @@ function removeShell(shot) {
   shot.remove();
 }
 function gameOver() {
+  runGameOver = false;
   controls.remove();
   body.color = "red";
   turret.color = "red";
@@ -712,9 +793,8 @@ function gameOver() {
   setTimeout(sorryForTrauma, 5000);
 }
 function gameOverText() {
-  GG = new Sprite(canvasW / 2, canvasH / 3, 0, 0);
-  GG.opacity = 0.2;
-  GG.text = "You only live once.";
+  GG.opacity = GG.opacity + 0.01;
+  GG.text = "You only live once. You made it to level " + level;
   GG.textSize = 40;
   GG.textColor = "red";
   GGFade();
@@ -761,6 +841,14 @@ function win() {
 }
 
 function enemyReload() {
-  enemyRel = !enemyRel;
+  if (enemyCantShoot == true) {
+    enemyRel = false;
+  } else {
+    enemyRel = !enemyRel;
+  }
+
   setTimeout(enemyReload, reloadTimer);
+}
+function enemyTurretRepair() {
+  enemyCantShoot = false;
 }
