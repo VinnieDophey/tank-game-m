@@ -1,0 +1,44 @@
+body {
+  font-family: sans-serif;
+  background-color: #cfcfcfb1;
+  margin: 0;
+}
+p {
+  color: gray;
+}
+
+header {
+  background-color: #0d98ba;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: white;
+}
+footer {
+  background-color: #003846;
+  padding: 30px;
+  font-size: 20px;
+  color: white;
+}
+
+.notTooLeft {
+  margin-left: 29%;
+}
+/* nav {
+  float: left;
+  width: 30%;
+  height: 300px;
+  background: #ceeef6;
+  padding: 20px;
+}
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}  */
+.main {
+  margin: auto;
+  width: 40%;
+  background-color: #ffff;
+  padding: 10px;
+  line-height: 2;
+}

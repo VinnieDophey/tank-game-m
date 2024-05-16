@@ -1,24 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script type="text/javascript" src="pathfinding-browser.min.js"></script>
-    <script src="https://p5play.org/v3/planck.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.js"></script>
-    <!-- Version 3 of p5play -->
-
-    <script src="https://p5play.org/v3/p5play.js"></script>
-
-    <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
-    <meta charset="utf-8" />
-    
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main></main>
-    <style>
-      body{
-        background-color:black
-      }
-    </style>
-    <script src="sketch.js"></script>
+    <header><b>Tank Domination Wiki</b></header>
+    <container
+      ><div class="main">
+        <h1><a href="game.html">Play Game</a></h1>
+        <h1>Tiles:</h1>
+        <h2>Rocks</h2>
+        <img src="rock.png" alt="Image of Rock Tile in game." />
+        <p>
+          Rocks are tiles that are unbreakable by player shots, enemy shots, and
+          mines. Player and enemy shells shatter on contact with rocks.
+        </p>
+        <h2>Sand</h2>
+        <img src="sand.png" alt="Image of Sand Tile in game." />
+        <p>
+          Sand are tiles that can be broken by player and enemy shots, and
+          enemies can see you behind sand tiles.
+        </p>
+        <h2>Metal</h2>
+        <img src="metal.png" alt="Image of Metal Tile in game." />
+        <p>
+          Metals are tiles that have a unique hard crystal formations, allowing
+          both player shells and enemy shells to bounce instead of spontaniously
+          collapsing upon contact. Can make excellent trickshots!
+        </p>
+        <h1>Player Parts</h1>
+        <img
+          src="playerTank.png"
+          alt="Image of the Player's Tank in game."
+          width="20%"
+        />
+        <h2>Player Body</h2>
+
+        <p>
+          The body is the most important part of the Player Tank. It connects
+          all different components of the tank. Upon hit, it may suffer minor
+          damages or major damages that require five seconds of immobillity to
+          fix. Sometimes, the damage is too major and causes the ammunition
+          storage to spontaniously combust, leading to the death of all crew
+          members.
+        </p>
+        <h2>Player Wheels</h2>
+
+        <p>
+          Wheels are responsible for movement. When commanded to move forward,
+          they start at a slow speed and accelerate to the maximum speed. The
+          maximum speed is slower while backing up as the drive sprockets,
+          idlers, and return rollers are optimized for high-speed forward
+          travel, and less so for reverse. When hit, it may suffer mninor
+          damages or major damages that render the tank immobile for five
+          seconds. In rare cases, the enemy shell can penetrate through the
+          wheels into the body where crew members are more prone to dying.
+        </p>
+        <h2>Player Turret</h2>
+
+        <p>
+          Turret is the main offensive aspect of the Player's Tank. It allows
+          for long range and precise targeting. Turrets can spin 360 degrees to
+          ensure coverage from all fronts, but they spin slowly, so don't get
+          flanked! Upon hit, the turret may get disabled - unusable for five
+          seconds before it is repaired.
+        </p>
+
+        <h2>Player Mines</h2>
+        <img src="mine.png" alt="Image of Mines in game." width="20%" />
+        <p>
+          Mines can be dropped from the Player's Tank. These mines explode upon
+          shot, and inflict large damage. It is an almost guarenteed kill if it
+          manages to hit the Enemy Tank, but I warn, it also destroys the
+          player.
+        </p>
+        <h1>Enemy parts</h1>
+        <img
+          src="enemyTank.png"
+          alt="Image of the Enemy's Tank in game."
+          width="40%"
+        />
+        <p>
+          There are many different variations of the Enemy Tank with different
+          abillities. Those are two examples of different colors.
+        </p>
+        <h2>Enemy Body</h2>
+        <p>
+          This is the main part of the Enemy's Tank. It is not as protected as
+          the player's body due to the lack of sloped armor. Therefore, it is
+          easy for the player to penetrate, although sometimes their shells will
+          not.
+        </p>
+        <h2>Enemy Turret</h2>
+        <p>
+          This is the main offensive unit of the enemy. It shoots in bursts of
+          usually three or four. It inflicts high damage and is extremely
+          dangerous as multiple of them hit the player in a close timespan.
+        </p>
+        <h1>Main Gameplay Flow</h1>
+        <p>
+          The player must destroy all enemy tanks, and then they will
+          automatically be deployed the next level.
+        </p>
+      </div></container
+    >
+    <footer>
+      <div class="notTooLeft">
+        Tank Domination Wiki <br />
+        Made by Vinnie Dophey (Vincent Pham) <br />
+        Made with P5Play <br />
+        For scool :D
+      </div>
+    </footer>
   </body>
 </html>
