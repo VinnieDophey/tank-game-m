@@ -189,6 +189,7 @@ function setup() {
   controls.image = "controls.png";
   GG = new Sprite(canvasW / 2, canvasH / 3, 0, 0);
   GG.opacity = 0;
+  GG.overlap(allSprites);
   enemyAI();
 }
 
@@ -302,14 +303,14 @@ function L3Map() {
       "r......................r",
       "r........r.....r.......r",
       "r........r.....r.......r",
-      "r......rrrrrrrrrrr....r",
-      "r.....................r",
+      "r......rrrssssrrr......r",
+      "r........s.....s.......r",
+      "r........s.....s.......r",
+      "r........s.....s.......r",
+      "r........s.....s.......r",
+      "r......rrrssssrrr......r",
       "r........r.....r.......r",
-      "r......rrrrrrrrrrr.....r",
       "r........r.....r.......r",
-      "r........r.....r.......r",
-      "r........r.....r.......r",
-      "r......................r",
       "r......................r",
       "rrrrrrrrrrrrrrrrrrrrrrrr",
     ],
@@ -401,6 +402,7 @@ function starting() {
   if (kb.pressed(" ")) {
     gameStatus = level;
   }
+  tracker.opacity = 0;
 }
 function levelOne() {
   text.remove();
@@ -484,7 +486,7 @@ function levelTwo() {
   background("green");
   playerControls();
   if (tracker.overlap(rock)) {
-    enemyTurret.rotationSpeed = 1;
+    // enemyTurret.rotationSpeed = 1;
     tracker.remove();
   } else if (tracker.overlap(body)) {
     enemyTurret.rotateMinTo(body, 1, 0);
@@ -543,16 +545,19 @@ function levelTwo() {
   // sounds();
 }
 function levelThree() {
-  enemyBody.moveTo(1250, 200);
-  enemyTurret.moveTo(1250, 200);
-
+  rock.layer = 1;
+  sand.layer = 1;
+  metal.layer = 1;
+  enemyBody.layer = 2;
+  enemyTurret.layer = 2;
   background("green");
   playerControls();
   if (tracker.overlap(rock)) {
-    enemyTurret.rotationSpeed = 1;
     tracker.remove();
   } else if (tracker.overlap(body)) {
     enemyTurret.rotateMinTo(body, 1, 0);
+    enemyBody.moveTo(body.x, body.y);
+    enemyTurret.moveTo(body.x, body.y);
     if (enemyRel == true) {
       enemyShoot();
     }
@@ -605,7 +610,7 @@ function levelThree() {
   } else {
     turret.color = "	#0D98BA";
   }
-  sounds;
+  //   sounds;
 }
 function hit(body, enemyShot) {
   enemyShotBlowup(body);
@@ -650,6 +655,7 @@ function thit() {
     damageIndicator.opacity = 1;
     damageIndicator.text = "Hit! No major damage.";
   } else if (bulletChance < 90) {
+    enemyShot.remove();
     damageShow = new damageIndicator.Sprite(body.x, body.y, 0, 0);
     damageIndicator.opacity = 1;
     damageIndicator.text = "Turret Damaged. Reparing.";
@@ -941,8 +947,8 @@ function win() {
     body.rotation = 0;
     allSprites.rotationSpeed = 0;
     allSprites.speed = 0;
-    body.x = 200;
-    body.y = 200;
+    body.x = canvasW / 2;
+    body.y = canvasH / 2;
     wheelLeft.x = body.x;
     wheelLeft.y = body.y;
     wheelRight.x = body.x;
@@ -953,8 +959,10 @@ function win() {
     enemyBody.y = 700;
     enemyTurret.x = enemyBody.x;
     enemyTurret.y = enemyBody.y;
-    enemyBody.color = "orange";
-    enemyTurret.color = "red";
+    enemyBody.color = "white";
+    enemyTurret.color = "white";
+    enemyBody.opacity = 0.5;
+    enemyTurret.opacity = 0.5;
     tilesGroup.remove();
     if (playermines != 0) {
       blowMine();
