@@ -9,7 +9,7 @@ March 21st 2024 - v1.0
 let tankIdle;
 let peformance = false;
 let playermines = 0;
-alert("Use fullscreen (F11) for the best experience!");
+// alert("Use fullscreen (F11) for the best experience!");
 let body;
 let canvasW = 1440;
 let canvasH = 810;
