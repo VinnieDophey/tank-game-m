@@ -21,15 +21,18 @@ let reloadTimer = 2000;
 let maxForwardSpeed = 0.1;
 let fade = 0;
 let enemyRel = false;
+let overlappingEnemyMine = false;
 overlappingMine = false;
 runGameOver = false;
 level = 1;
 let enemyCantShoot = false;
+let enemyFadeOut = 0;
 // function preload() {
 //   tankIdleSound = loadSound("tankSound.wav");
 // }
 function setup() {
   bg = loadImage("Tank Title Screen.png");
+  ebg = loadImage("end.png");
   new Canvas(canvasW, canvasH, "fullscreen");
 
   body = new Sprite(100, 700, canvasW / 40, canvasH / 16);
@@ -97,7 +100,12 @@ function setup() {
   directionFront.overlap(allSprites);
   directionBack.overlap(allSprites);
   mines.color = "red";
-
+  thing = new Sprite(body.x + 5, body.y + 10, 20, 10);
+  thing.color = "#0D98BA";
+  thing.layer = 3;
+  turret.layer = 4;
+  a = new GlueJoint(thing, body);
+  thing.overlap(allSprites);
   // wine = new Sprite(100, 100, 50, 50);
 
   g = new Group();
@@ -322,17 +330,17 @@ function L3Map() {
 }
 function draw() {
   // console.log(overlappingMine);
-  if (peformance == false) {
-    if (kb.pressed("p")) {
-      p5play.renderStats = true;
-      peformance = true;
-    }
-  } else if (peformance == true) {
-    if (kb.pressed("p")) {
-      p5play.renderStats = false;
-      peformance = false;
-    }
-  }
+  //   if (peformance == false) {
+  //     if (kb.pressed("p")) {
+  //       p5play.renderStats = true;
+  //       peformance = true;
+  //     }
+  //   } else if (peformance == true) {
+  //     if (kb.pressed("p")) {
+  //       p5play.renderStats = false;
+  //       peformance = false;
+  //     }
+  //   }
   // moveEnemy();
 
   // async function moveEnemy() {
@@ -365,6 +373,16 @@ function draw() {
     starting();
   } else if (gameStatus == 3) {
     levelThree();
+  } else if (gameStatus == 4) {
+    if (enemyFadeOut == 1) {
+      setTimeout(enemyBye, 2000);
+    }
+    enemyFadeOut = 0;
+    tilesGroup.remove();
+    background("black");
+    allSprites.speed = 0;
+  } else if (gameStatus == "end") {
+    background(ebg);
   }
 }
 function start() {
@@ -456,7 +474,7 @@ function levelOne() {
       gameStatus = "win";
     }
   }
-  if (mines.overlap(enemyBody)) {
+  if (enemyBody.overlapping(mines)) {
     gameStatus = "win";
   }
   bullet();
@@ -527,7 +545,7 @@ function levelTwo() {
       damageIndicator.text = "No Damage";
     }
   }
-  if (mines.overlap(enemyBody)) {
+  if (enemyBody.overlapping(mines)) {
     gameStatus = "win";
   }
   bullet();
@@ -579,6 +597,7 @@ function levelThree() {
       damageIndicator.text = "No Penetration";
     } else {
       gameStatus = "win";
+      //   enemyFadeOut = 1;
     }
   }
   if (shot.collides(enemyTurret)) {
@@ -595,8 +614,9 @@ function levelThree() {
       damageIndicator.text = "No Damage";
     }
   }
-  if (mines.overlap(enemyBody)) {
+  if (enemyBody.overlapping(mines)) {
     gameStatus = "win";
+    // enemyFadeOut = 1;
   }
   bullet();
   if (body.overlapping(mines)) {
@@ -914,17 +934,18 @@ function sorryForTrauma() {
   location.reload();
 }
 function win() {
-  enemyBody.color = "black";
-  enemyTurret.color = "black";
-
   gameStatus = level;
   // console.log(gameStatus + "Hi");
   if (gameStatus == 1) {
+    enemyBody.color = "black";
+    enemyTurret.color = "black";
     body.rotation = 0;
     allSprites.rotationSpeed = 0;
     allSprites.speed = 0;
     body.x = 200;
     body.y = 200;
+    thing.x = body.x;
+    thing.y = body.y;
     wheelLeft.x = body.x;
     wheelLeft.y = body.y;
     wheelRight.x = body.x;
@@ -944,11 +965,15 @@ function win() {
 
     L2Map();
   } else if (gameStatus == 2) {
+    enemyBody.color = "black";
+    enemyTurret.color = "black";
     body.rotation = 0;
     allSprites.rotationSpeed = 0;
     allSprites.speed = 0;
     body.x = canvasW / 2;
     body.y = canvasH / 2;
+    thing.x = body.x;
+    thing.y = body.y;
     wheelLeft.x = body.x;
     wheelLeft.y = body.y;
     wheelRight.x = body.x;
@@ -963,19 +988,34 @@ function win() {
     enemyTurret.color = "white";
     enemyBody.opacity = 0.5;
     enemyTurret.opacity = 0.5;
+    enemyBody.overlap(allSprites);
+    enemyTurret.overlap(allSprites);
     tilesGroup.remove();
     if (playermines != 0) {
       blowMine();
     }
     console.log("HI");
     L3Map();
+  } else if (gameStatus == 3) {
+    enemyFadeOut = 1;
   }
   level++;
   gameStatus = level;
   console.log(level + "akdbjaodhiawodihaw");
   console.log(gameStatus);
 }
+function enemyBye() {
+  if (enemyBody.opacity < 0.01) {
+    allSprites.opacity = 0;
+    gameStatus = "end";
+  } else {
+    enemyBody.opacity = enemyBody.opacity - 0.01;
+    enemyTurret.opacity = enemyTurret.opacity - 0.01;
+  }
 
+  setTimeout(enemyBye, 100);
+  console.log("HIDhAOWdiHA");
+}
 function enemyReload() {
   if (enemyCantShoot == true) {
     enemyRel = false;
