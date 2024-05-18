@@ -1,15 +1,7 @@
-/*
-Tank Domination
-Vincent Pham
-History:
-March 21st 2024 - v1.0
-*/
-
-// https://p5play.org/learn
+//defining all the variables
 let tankIdle;
 let peformance = false;
 let playermines = 0;
-// alert("Use fullscreen (F11) for the best experience!");
 let body;
 let canvasW = 1440;
 let canvasH = 810;
@@ -27,14 +19,13 @@ runGameOver = false;
 level = 1;
 let enemyCantShoot = false;
 let enemyFadeOut = 0;
-// function preload() {
-//   tankIdleSound = loadSound("tankSound.wav");
-// }
 function setup() {
+  //loading images
   bg = loadImage("Tank Title Screen.png");
   ebg = loadImage("end.png");
+  //using values for canvas so I could reuse them for other sprites
   new Canvas(canvasW, canvasH, "fullscreen");
-
+  //making player things
   body = new Sprite(100, 700, canvasW / 40, canvasH / 16);
   turret = new Sprite(body.x, body.y, canvasW / 25, canvasH / 110);
   body.layer = 2;
@@ -59,6 +50,7 @@ function setup() {
   wheelRight.color = "black";
   wheelLeft.layer = 1;
   wheelRight.layer = 1;
+  //overlaps so collision doesnt go ham
   wheelLeft.overlap(wheelRight);
   body.overlap(wheelLeft);
   turret.overlap(wheelLeft);
@@ -66,25 +58,20 @@ function setup() {
   turret.overlap(wheelRight);
   l = new GlueJoint(wheelLeft, body);
   r = new GlueJoint(wheelRight, body);
+  //direction sprites are for movement
   directionFront = new Sprite(body.x, body.y - canvasW / 100, 10);
 
   directionBack = new Sprite(body.x, body.y + canvasW / 100, 10);
   directionBack.opacity = 0;
-  // directionLeft = new Sprite(body.x-30, body.y, 10);
 
-  // directionRight = new Sprite(body.x+30, body.y, 10);
-
-  // directionFront.opacity = 0
   a = new GlueJoint(body, directionFront);
   b = new GlueJoint(body, directionBack);
-  // c = new GlueJoint(body, directionLeft);
-  // d = new GlueJoint(body, directionRight);
+
   body.overlap(directionFront);
   turret.overlap(directionFront);
   turret.overlap(directionBack);
-  // turret.overlap(directionLeft);
-  // turret.overlap(directionRight);
 
+  //pre-loading sprites that are created on command to avoid a specific bug
   shots = new Group();
 
   shot = new Sprite(-50, -50, canvasW / 110);
@@ -100,61 +87,30 @@ function setup() {
   directionFront.overlap(allSprites);
   directionBack.overlap(allSprites);
   mines.color = "red";
+  //player decoration to give them a sense of which way is front and which way is back.
   thing = new Sprite(body.x + 5, body.y + 10, 20, 10);
   thing.color = "#0D98BA";
   thing.layer = 3;
   turret.layer = 4;
   a = new GlueJoint(thing, body);
   thing.overlap(allSprites);
-  // wine = new Sprite(100, 100, 50, 50);
 
-  g = new Group();
-  g.tile = "1";
-  // gbody = new g.Sprite(1000, canvasH / 2, canvasW / 40, canvasH / 16, "k");
-  // gturret = new g.Sprite(gbody.x, gbody.y, canvasW / 25, canvasH / 110, "k");
-  // gbody.layer = 2;
-  // gj = new HingeJoint(gturret, gbody);
-  // gturret.overlap(gbody);
-  // gbody.color = "	#345715";
-  // gturret.color = "	#345715";
-  // gturret.offset.x = canvasH / 55;
-  // gwheelLeft = new g.Sprite(
-  //   gbody.x - canvasW / 80,
-  //   gbody.y,
-  //   canvasW / 120,
-  //   canvasH / 16
-  // );
-  // gwheelLeft.color = "black";
-  // gwheelRight = new g.Sprite(
-  //   gbody.x + canvasW / 80,
-  //   gbody.y,
-  //   canvasW / 120,
-  //   canvasH / 16
-  // );
-  // gwheelRight.color = "black";
-  // gwheelLeft.layer = 1;
-  // gwheelRight.layer = 1;
-  // gwheelLeft.overlap(gwheelRight);
-  // gbody.overlap(gwheelLeft);
-  // gturret.overlap(gwheelLeft);
-  // gbody.overlap(gwheelRight);
-  // gturret.overlap(gwheelRight);
-  // gl = new GlueJoint(gwheelLeft, gbody);
-  // gr = new GlueJoint(gwheelRight, gbody);
-  // gState = "wander";
-
+  //creates map for first level
   newMap();
+  //cursor
   cur = new Sprite();
   cur.overlap(allSprites);
   enemyReload();
   cur.img = "blueCursor.webp";
   cur.scale = 0.07;
   mouse.visible = false;
+  //make sure cursor is displayed above all other things.
   mines.layer = 1;
   rock.layer = 1;
   metal.layer = 1;
   sand.layer = 1;
   cur.layer = 5;
+  //creating text
   text = new Sprite(0.8 * canvasW, 0.6 * canvasH, canvasW / 4, 100, "s");
   text.color = "brown";
   text.text = "Press [SPACE] to Start";
@@ -163,8 +119,8 @@ function setup() {
   screenCover = new Sprite(0, 0, canvasW * 2, canvasH * 2, "s");
   screenCover.color = "black";
   screenCover.overlap(allSprites);
-  // screenCover.layer = 4;
 
+  //ET group that encompasses all enemy sprites. ET is no longer used but enemy sprites still are.
   ET = new Group();
   ET.layer = 1;
   ET.color = "brown";
@@ -179,12 +135,14 @@ function setup() {
   enemyTurret.offset.x = canvasH / 55;
   enemyShots = new Group();
   enemyShots.life = 3000;
+  //pre-loading enemy shots
   enemyShot = new enemyShots.Sprite(
     enemyTurret.x,
     enemyTurret.y,
     canvasW / 180
   );
   enemyShot.remove();
+  //damage indicator
   damageIndicator = new Group();
   damageIndicator.opacity = 0.5;
   damageIndicator.color = "black";
@@ -195,13 +153,15 @@ function setup() {
   controls.diameter = 20;
   controls.collider = "s";
   controls.image = "controls.png";
+  //death text
   GG = new Sprite(canvasW / 2, canvasH / 3, 0, 0);
   GG.opacity = 0;
   GG.overlap(allSprites);
   enemyAI();
 }
-
+//first level map
 function newMap() {
+  //making tiles
   rock = new Group();
   rock.w = canvasW / 24;
   rock.h = canvasH / 13.5;
@@ -244,42 +204,8 @@ function newMap() {
     rock.w + 0,
     rock.h + 0
   );
-
-  // var matrix = [
-  //   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  //   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  // ];
-  // var grid = new PF.Grid(matrix);
-
-  // var finder = new PF.AStarFinder({
-  //   allowDiagonal: true,
-  //   dontCrossCorners: true,
-  // });
-  // var path = finder.findPath(16, 6, 3, 9, grid);
-  // // console.log(path);
-
-  // node = new Group();
-  // node.visited = false;
-  // node.radius = 10;
-  // node.collider = "n";
-  // // console.log(path);
-  // for (p of path) {
-  //   n = new node.Sprite(p[0] * 60 + 20, p[1] * 60 + 20);
-  // }
 }
+//second level map
 function L2Map() {
   tilesGroup = new Tiles(
     [
@@ -304,6 +230,7 @@ function L2Map() {
     rock.h + 0
   );
 }
+//third level map
 function L3Map() {
   tilesGroup = new Tiles(
     [
@@ -329,33 +256,10 @@ function L3Map() {
   );
 }
 function draw() {
-  // console.log(overlappingMine);
-  //   if (peformance == false) {
-  //     if (kb.pressed("p")) {
-  //       p5play.renderStats = true;
-  //       peformance = true;
-  //     }
-  //   } else if (peformance == true) {
-  //     if (kb.pressed("p")) {
-  //       p5play.renderStats = false;
-  //       peformance = false;
-  //     }
-  //   }
-  // moveEnemy();
-
-  // async function moveEnemy() {
-  // for (i = 0; i < node.length; i++) {
-  // await gbody.moveTo(node[i]);
-  // if (gbody.x == node[i].x) {
-  //   if (gbody.y == node[i].y) {
-
-  //   }
-  // }
-  // }
-  // }
-  // moveEnemy().then();
-  // console.log(gameStatus);
+  //replaces cursor with custom sprite
   cur.moveTowards(mouse, 1);
+
+  //game statuses
   if (gameStatus == "startScreen") {
     start();
   } else if (gameStatus == 1) {
@@ -383,32 +287,27 @@ function draw() {
     allSprites.speed = 0;
   } else if (gameStatus == "end") {
     background(ebg);
+    mouse.visible = true;
   }
 }
+//instructions
 function start() {
   background(bg);
   allSprites.opacity = 0;
   screenCover.opacity = fade;
   text.opacity = 1;
   if (kb.pressed(" ")) {
-    // fadeIn();
     gameStatus = "instructions";
-    // alert("hi");
   }
 }
+//fading in to black. Used in death screen
 function fadeIn() {
   fade = fade + 0.01;
+  //screencover is a sprite that covers the whole screen making a cool effect.
   screenCover.opacity = fade;
   setTimeout(fadeIn, 1000);
 }
-// function fadeOut() {
-//   fade = fadeOut - 0.01;
-//   if (fade == 0) {
-//     return;
-//   } else {
-//     setTimeout(fadeOut, 10);
-//   }
-// }
+//used as a "setup" function for level one
 function starting() {
   allSprites.opacity = 1;
   directionFront.opacity = 0;
@@ -422,28 +321,28 @@ function starting() {
   }
   tracker.opacity = 0;
 }
+//things that need to be done for level 1 to run
 function levelOne() {
   text.remove();
   controls.remove();
   playerControls();
-  // fadeOut();
+
   screenCover.opacity = fade;
-  // gturret.x = gbody.x;
-  // gturret.y = gbody.y;
-  if ((gState = "wander")) {
-    // gbody.moveTo(gbody.x+15)
-  }
+
+  //if enemy can see the player or not
   if (tracker.overlap(rock)) {
     enemyTurret.rotationSpeed = 1;
     tracker.remove();
   } else if (tracker.overlap(body)) {
+    //if it sees, it points its turret towards the player
     enemyTurret.rotateMinTo(body, 1, 0);
-
+    //... and fires.
     if (enemyRel == true) {
       enemyShoot();
     }
     tracker.remove();
   }
+  //bullet shot collisions and results Also includes damage indicators.
   enemyShot.collides(rock, enemyShotBlowup);
   enemyShot.collides(body, hit);
   enemyShot.collides(wheelLeft, whit);
@@ -479,24 +378,23 @@ function levelOne() {
   }
   bullet();
   if (body.overlapping(mines)) {
-    // console.log(mines)
     overlappingMine = true;
   } else {
     overlappingMine = false;
   }
-
+  //show that the player can't shoot.
   if (reload == 1) {
     turret.color = "grey";
   } else {
     turret.color = "	#0D98BA";
   }
-
-  // sounds();
 }
 function shit(sands, shots) {
   shots.remove();
   sands.remove();
 }
+//second level. Most of the things are the same as the first level except it doesn't remove the text and the instructions sprite.
+
 function levelTwo() {
   enemyBody.moveTo(1250, 200);
   enemyTurret.moveTo(1250, 200);
@@ -504,7 +402,7 @@ function levelTwo() {
   background("green");
   playerControls();
   if (tracker.overlap(rock)) {
-    // enemyTurret.rotationSpeed = 1;
+    //The enemy tank will not look away if it doesn't see you anymore, making it more difficult
     tracker.remove();
   } else if (tracker.overlap(body)) {
     enemyTurret.rotateMinTo(body, 1, 0);
@@ -550,7 +448,6 @@ function levelTwo() {
   }
   bullet();
   if (body.overlapping(mines)) {
-    // console.log(mines)
     overlappingMine = true;
   } else {
     overlappingMine = false;
@@ -560,8 +457,8 @@ function levelTwo() {
   } else {
     turret.color = "	#0D98BA";
   }
-  // sounds();
 }
+//Third level.
 function levelThree() {
   rock.layer = 1;
   sand.layer = 1;
@@ -573,6 +470,7 @@ function levelThree() {
   if (tracker.overlap(rock)) {
     tracker.remove();
   } else if (tracker.overlap(body)) {
+    //the enemy is mad and chases you down!
     enemyTurret.rotateMinTo(body, 1, 0);
     enemyBody.moveTo(body.x, body.y);
     enemyTurret.moveTo(body.x, body.y);
@@ -597,7 +495,6 @@ function levelThree() {
       damageIndicator.text = "No Penetration";
     } else {
       gameStatus = "win";
-      //   enemyFadeOut = 1;
     }
   }
   if (shot.collides(enemyTurret)) {
@@ -616,11 +513,9 @@ function levelThree() {
   }
   if (enemyBody.overlapping(mines)) {
     gameStatus = "win";
-    // enemyFadeOut = 1;
   }
   bullet();
   if (body.overlapping(mines)) {
-    // console.log(mines)
     overlappingMine = true;
   } else {
     overlappingMine = false;
@@ -630,8 +525,8 @@ function levelThree() {
   } else {
     turret.color = "	#0D98BA";
   }
-  //   sounds;
 }
+//what happens if you're hit
 function hit(body, enemyShot) {
   enemyShotBlowup(body);
   let bulletChance = random(0, 100);
@@ -683,9 +578,11 @@ function thit() {
     setTimeout(reloading, 3000);
   }
 }
+//make the player unable to move
 function repair() {
   maxForwardSpeed = 0.1;
 }
+//when the enemy shoots
 function enemyShoot() {
   enemyShot = new enemyShots.Sprite(
     enemyTurret.x,
@@ -700,6 +597,7 @@ function enemyShoot() {
   enemyShots.overlap(enemyTurret);
   enemyShots.bounciness = 0.999;
 }
+//when the enemy bullet hits rock tile
 function enemyShotBlowup(enemyShot, rock) {
   enemyShot.diameter = canvasW / 80;
   enemyShot.speed = 0;
@@ -710,14 +608,11 @@ function enemyShotBlowup(enemyShot, rock) {
 }
 
 function enemyShotRemove() {}
+//player shooting controls
 function playerControls() {
   turret.rotateMinTo(mouse, 1, 0);
-  // camera.x = body.x;
-  // camera.y = body.y;
+
   playerMovement();
-  // if (body.overlap(mines)) {
-  //   gameStatus = "lose";
-  // }
 
   shots.overlap(mines, blowMine);
 
@@ -729,13 +624,11 @@ function playerControls() {
   if (kb.pressed(" ") && playermines == 0) {
     playerMine();
   }
-  // if (body.collides(wine)) {
-  //   gameStatus = "win";
-  // }
 }
-
+//player moving controls
 function playerMovement() {
   body.speed = 3;
+  //forward
   if (kb.pressing("up")) {
     body.moveTowards(directionFront.x, directionFront.y, forwardSpeed);
     forwardSpeed = forwardSpeed + 0.001;
@@ -743,31 +636,35 @@ function playerMovement() {
       forwardSpeed = maxForwardSpeed;
     }
     rotationSpeed = 0;
-  } else if (kb.pressing("down")) {
+  } //backwards
+  else if (kb.pressing("down")) {
     body.moveTowards(directionBack.x, directionBack.y, backwardSpeed);
     backwardSpeed = backwardSpeed + 0.0005;
     if (backwardSpeed > maxForwardSpeed / 2) {
       backwardSpeed = maxForwardSpeed / 2;
     }
     rotationSpeed = 0;
-  } else if (kb.pressing("left")) {
+  } //turn left
+  else if (kb.pressing("left")) {
     body.rotate(-1, 3);
     body.speed = 0;
-  } else if (kb.pressing("right")) {
+  } //turn right
+  else if (kb.pressing("right")) {
     body.rotate(1, 3);
     body.speed = 0;
   } else {
+    //make sure player doesn't drift
     body.speed = 0;
     body.rotationSpeed = 0;
   }
-
+  //make sure player doesn't drift
   if (kb.released("up")) {
     forwardSpeed = 0;
   }
   if (kb.released("down")) {
     backwardSpeed = 0;
   }
-
+  //move and turn
   if (kb.pressing("right") && kb.pressing("up")) {
     body.rotate(1, 3);
     body.moveTowards(directionFront.x, directionFront.y, forwardSpeed);
@@ -804,14 +701,8 @@ function playerMovement() {
   if (kb.released("right")) {
     rotationSpeed = 0;
   }
-  //AI for level 1
-  // if (gState == "wander") {
-  //   gbody.direction = -90;
-  //   gturret.rotate = (15,30);
-  //   gbody.speed = 1;
-  // }
 }
-
+//spawn tracker to make enemy see you
 function enemyAI() {
   tracker = new Sprite(enemyBody.x, enemyBody.y, 5);
   tracker.opacity = 0;
@@ -822,8 +713,9 @@ function enemyAI() {
 
   setTimeout(enemyAI, 500);
 }
+
+//mine when it explodes.
 function blowMine() {
-  // mine.overlapping(sand, destroySand);
   mine.diameter = canvasW / 8;
   mine.color = "yellow";
   mine.overlap(wheelLeft);
@@ -832,15 +724,15 @@ function blowMine() {
   if (overlappingMine == true) {
     gameStatus = "lose";
     runGameOver = true;
-    // console.log("wut");
   }
   setTimeout(removeMine, 200);
 }
-
+//deletes mine after exploding
 function removeMine() {
   mine.remove();
   playermines = 0;
 }
+//spawning player bullet
 function playerShoot() {
   shot = new shots.Sprite(turret.x, turret.y, canvasW / 180);
   shot.direction = turret.rotation;
@@ -852,21 +744,17 @@ function playerShoot() {
   shots.overlap(directionBack);
   shots.overlap(directionFront);
   shots.bounciness = 0.999;
-  // shot.life = 300;
+
   shot.speed = 20;
   reloading();
 }
+
 function bullet() {
   for (i = 0; i < shots.length; i++) {
     if (shots[i].collides(rock)) {
       shellExplode(shots[i]);
-      // } else if (shots[i].collides(sand)) {
-      //   shellExplode(shots[i]);
-
-      //   setTimeout(() => {
-      //     removeShell(shot), 1;
-      //   });
     } else if (shots[i].collides(metal)) {
+      //turn on bullet collision after it bounces on a wall
       shots[i].collides(body);
       shots[i].collides(turret);
       shots[i].collides(wheelLeft);
@@ -876,40 +764,36 @@ function bullet() {
     }
   }
 }
+//spawning mines
 function playerMine() {
   playermines++;
   mine = new mines.Sprite(body.x, body.y);
 }
+//players can't shoot when it's reloading
 function reloading() {
   reload = 1;
 
   setTimeout(doneReloading, reloadTimer);
 }
+//let players shoot after reloading
 function doneReloading() {
   reload = 0;
 }
-
+//make bullets explode when it hits rock tile
 function shellExplode(shot) {
   shot.diameter = canvasW / 80;
   shot.speed = 0;
   shot.color = "yellow";
-  // console.log("AHH");
-  // for (i=0;i<sand.length;i++){
-  //   dist[i] = (sqrt((sand[i].x-shot.x)**2+(sand[i].y-shot.y)**2))
-  // }
 
-  // var min = (Math.min(...dist));
-  // var index = dist.indexOf(min);
-  // console.log(index)
-  // sand[index].remove();
   setTimeout(() => {
     removeShell(shot), 1;
   });
 }
+//remove bullet  after exploding
 function removeShell(shot) {
-  // console.log("MONGUS!");
   shot.remove();
 }
+//game over screen
 function gameOver() {
   runGameOver = false;
   controls.remove();
@@ -922,6 +806,7 @@ function gameOver() {
   setTimeout(gameOverText, 2000);
   setTimeout(sorryForTrauma, 5000);
 }
+//show game over text
 function gameOverText() {
   GG.opacity = GG.opacity + 0.01;
   GG.text = "You only live once. You made it to level " + level;
@@ -929,13 +814,13 @@ function gameOverText() {
   GG.textColor = "red";
   GGFade();
 }
-
+//restart game
 function sorryForTrauma() {
   location.reload();
 }
 function win() {
   gameStatus = level;
-  // console.log(gameStatus + "Hi");
+  //setup function for level 2
   if (gameStatus == 1) {
     enemyBody.color = "black";
     enemyTurret.color = "black";
@@ -965,6 +850,7 @@ function win() {
 
     L2Map();
   } else if (gameStatus == 2) {
+    //setup function for level 3
     enemyBody.color = "black";
     enemyTurret.color = "black";
     body.rotation = 0;
@@ -994,17 +880,16 @@ function win() {
     if (playermines != 0) {
       blowMine();
     }
-    console.log("HI");
     L3Map();
   } else if (gameStatus == 3) {
+    //start fading out enemy
     enemyFadeOut = 1;
   }
   level++;
   gameStatus = level;
-  console.log(level + "akdbjaodhiawodihaw");
-  console.log(gameStatus);
 }
 function enemyBye() {
+  //makes enemy fades out
   if (enemyBody.opacity < 0.01) {
     allSprites.opacity = 0;
     gameStatus = "end";
@@ -1014,8 +899,8 @@ function enemyBye() {
   }
 
   setTimeout(enemyBye, 100);
-  console.log("HIDhAOWdiHA");
 }
+//makes enemy shooting more unpredictable
 function enemyReload() {
   if (enemyCantShoot == true) {
     enemyRel = false;
@@ -1025,9 +910,7 @@ function enemyReload() {
 
   setTimeout(enemyReload, reloadTimer);
 }
+//when enemy's turret is hit it may be disabled. makes it so they can't shoot.
 function enemyTurretRepair() {
   enemyCantShoot = false;
 }
-// function sounds() {
-//   tankIdle.play();
-// }
