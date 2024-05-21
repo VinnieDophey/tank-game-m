@@ -370,7 +370,9 @@ function levelOne() {
       setTimeout(enemyTurretRepair, 3000);
       enemyCantShoot = true;
     } else {
-      gameStatus = "win";
+      damageShow = new damageIndicator.Sprite(enemyBody.x, enemyBody.y, 0, 0);
+      damageIndicator.opacity = 1;
+      damageIndicator.text = "No Major Damage";
     }
   }
   if (enemyBody.overlapping(mines)) {
